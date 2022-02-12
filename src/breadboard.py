@@ -55,6 +55,7 @@ class BreadboardComputer:
                     
                     # init RAM with program bytes
                     for i in range(len(program)): self.RAM[i] = program[i]
+            
             except:
                 print('File not found:', filename)
                 sys.exit(1)

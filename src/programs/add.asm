@@ -1,0 +1,12 @@
+LDA 8
+ADD 9
+SUB 10
+OUT 0
+NOP
+NOP
+NOP
+NOP
+7
+3
+2
+

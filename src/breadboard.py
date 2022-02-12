@@ -6,6 +6,10 @@
 #
 ######################################
 
+# packages
+import sys
+import time
+
 # 8-bit breadboard computer class
 class BreadboardComputer:
     # init constructor
@@ -14,14 +18,47 @@ class BreadboardComputer:
         self.reset()
     
     # load program to RAM
-    def load(self):
-        # load program into RAM
-        self.RAM[0] = 0x54  # LDI 0x04
-        self.RAM[1] = 0xe0  # OUT
-        self.RAM[2] = 0xf0  # stop execution
-        self.RAM[0x0E] = 0x00
-        self.RAM[0x0F] = 0x00
-    
+    def load(self, filename):
+        if filename == '':
+            print('No file specified, running triangular numbers program by default')
+            print('Usage: python3 breadboard.py ./programs/fib.bin 0.05')
+            
+            # load program into RAM (prints triangular numbers)
+            self.RAM[0x0] = 0x1F    # LDA 0x0F
+            self.RAM[0x1] = 0x2E    # ADD 0x0E
+            self.RAM[0x2] = 0x79    # JC  0x09
+            self.RAM[0x3] = 0xE0    # OUT
+            self.RAM[0x4] = 0x4F    # STA 0x0F
+            self.RAM[0x5] = 0x1E    # LDA 0x0E
+            self.RAM[0x6] = 0x2D    # ADD 0x0D
+            self.RAM[0x7] = 0x4E    # STA 0x0E
+            self.RAM[0x8] = 0x60    # JMP 0x00
+            self.RAM[0x9] = 0x50    # LDI 0x00
+            self.RAM[0xA] = 0x4F    # STA 0x0F
+            self.RAM[0xB] = 0x1D    # LDA 0x0D
+            self.RAM[0xC] = 0x4E    # STA 0x0E
+            self.RAM[0xD] = 1       # DATA 1
+            self.RAM[0xE] = 1       # DATA 1
+            self.RAM[0xF] = 0       # DATA 0
+        
+        # read data from binary file
+        else:
+            try:
+                with open(filename, 'rb') as f:
+                    # read program bytes
+                    program = [int(i) for i in f.read()]
+
+                    # check program length
+                    if len(program) > 16:
+                        print('ERROR: Program length should be no more than 16 bytes')
+                        sys.exit(1)
+                    
+                    # init RAM with program bytes
+                    for i in range(len(program)): self.RAM[i] = program[i]
+            except:
+                print('File not found:', filename)
+                sys.exit(1)
+
     # reset CPU
     def reset(self):
         # register A (8-bit)
@@ -128,7 +165,17 @@ class BreadboardComputer:
         
     
     # main loop
-    def run(self):
+    def run(self, filename, speed):
+        # init CPU
+        computer.reset()
+        
+        # load program
+        computer.load(filename)
+        
+        # print extras
+        if filename: print('Filename:', filename, end='')
+        print (' running at', speed, 'ms')
+
         try:
             # run program from RAM
             while not self.HALT:
@@ -140,16 +187,27 @@ class BreadboardComputer:
                 
                 # increment program counter
                 self.PC += 1
+                
+                # clock delay
+                time.sleep(float(speed))
         except:
             pass
 
         print('All done!')
 
-# create 8-bit breadboard computer instance
-computer = BreadboardComputer()
-computer.reset()
-computer.load()
-computer.run()
+# run only if invoked directly
+if __name__ == '__main__':
+    # create 8-bit breadboard computer instance
+    computer = BreadboardComputer()
+
+    # extract filename & speed from command line args
+    try: filename = sys.argv[1]
+    except: filename = ''
+    try: speed = sys.argv[2]
+    except: speed = '0.05'
+
+    # run computer
+    computer.run(filename, speed)
 
         
         

@@ -53,7 +53,13 @@ for addr in range(len(program_bin)):
     try:
         print(hex(addr) + ':    ', end='')
         if opcodes[opcode] == 'JC' or opcodes[opcode] == 'JZ': print(' ', end='')
-        print(opcodes[opcode], hex(argument), '    ; ' + description[opcode].replace('XXXX', hex(argument)))
+        if opcodes[opcode] == 'NOP' and argument != 0:
+            print('DAT ', end='')
+            print(hex(argument), '    ; ' + 'Data byte definition XXXX'.replace('XXXX', hex(argument)))
+        else:
+            print(opcodes[opcode] + ' ', end='')
+            print(hex(argument), '    ; ' + description[opcode].replace('XXXX', hex(argument)))
+        
     except: print('ERROR: Unknown opcode', hex(opcode))
 
 
